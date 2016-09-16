@@ -58,7 +58,7 @@ import org.apache.commons.fileupload.util.Streams;
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  * @author Sean C. Sullivan
  *
- * @version $Id$
+ * @version $Id: FileUploadBase.java 963609 2010-07-13 06:56:47Z jochen $
  */
 public abstract class FileUploadBase {
 
@@ -958,7 +958,12 @@ public abstract class FileUploadBase {
 
             notifier = new MultipartStream.ProgressNotifier(listener,
                     ctx.getContentLength());
-            multi = new MultipartStream(input, boundary, notifier);
+            try {
+                multi = new MultipartStream(input, boundary, notifier);
+            }  catch (IllegalArgumentException iae) {
+                throw new InvalidContentTypeException(
+                    "The boundary specified in the " + CONTENT_TYPE + " header is too long", iae);
+            }
             multi.setHeaderEncoding(charEncoding);
 
             skipPreamble = true;
@@ -1129,7 +1134,7 @@ public abstract class FileUploadBase {
          * detail message.
          */
         public InvalidContentTypeException() {
-            // Nothing to do.
+            super();
         }
 
         /**
@@ -1140,6 +1145,10 @@ public abstract class FileUploadBase {
          */
         public InvalidContentTypeException(String message) {
             super(message);
+        }
+
+        public InvalidContentTypeException(String msg, Throwable cause) {
+            super(msg, cause);
         }
     }
 

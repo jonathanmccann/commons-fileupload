@@ -83,6 +83,12 @@ import org.apache.commons.io.output.DeferredFileOutputStream;
 public class DiskFileItem
     implements FileItem, FileItemHeadersSupport {
 
+    /**
+     * Although it implements {@link Serializable}, a DiskFileItem can actually only be deserialized,
+     * if this System property is true.
+     */
+    public static final String SERIALIZABLE_PROPERTY = DiskFileItem.class.getName() + ".serializable";
+
     // ----------------------------------------------------- Manifest constants
 
     /**
@@ -709,6 +715,11 @@ public class DiskFileItem
      */
     private void readObject(ObjectInputStream in)
             throws IOException, ClassNotFoundException {
+        if (!Boolean.getBoolean(SERIALIZABLE_PROPERTY)) {
+            throw new IllegalStateException("Property " + SERIALIZABLE_PROPERTY
+                + " is not true, rejecting to deserialize a DiskFileItem.");
+       }
+
         // read values
         in.defaultReadObject();
 
